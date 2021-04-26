@@ -7,13 +7,14 @@ GameWidget::GameWidget(QWidget *parent,GameMap * map, Player * player_self)
 {
 	count = 0;
 	this->grabKeyboard();
+	
+	//初始化前端界面
 	Player_yourself = player_self;
 	this->map = map;
-
-	//配置界面刷新为45hz
+	//配置界面刷新为100hz
 	timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &GameWidget::refreshUI);
-	timer->start(1000 / 45);
+	timer->start(1000 / 100);
 	ui.setupUi(this);
 }
 
@@ -45,7 +46,7 @@ void GameWidget::paintEvent(QPaintEvent *)
 	pen.setWidth(1);
 	painter.setPen(pen);
 
-	painter.drawEllipse(QRectF(Player_yourself->pos_x, Player_yourself->pos_y,20,20));
+	painter.drawEllipse(QRectF(Player_yourself->pos_x-10, Player_yourself->pos_y-10,20,20));
 	//绘制交互物体
 }
 //key press events
@@ -53,23 +54,23 @@ void GameWidget::keyPressEvent(QKeyEvent *e)
 {
 	if (e->key() == Qt::Key_A)
 	{
-		//cout << "左走" << endl;
 		Player_yourself->behavior_move_left = true;
 	}
 	if (e->key() == Qt::Key_D)
 	{
-		//cout << "右走" << endl;
 		Player_yourself->behavior_move_right = true;
 	}
 	if (e->key() == Qt::Key_S)
 	{
-		//cout << "后走" << endl;
 		Player_yourself->behavior_move_back = true;
 	}
 	if (e->key() == Qt::Key_W)
 	{
-		//cout << "前走" << endl;
 		Player_yourself->behavior_move_ahead = true;
+	}
+	if (e->key() == Qt::Key_Shift)
+	{
+		Player_yourself->behavior_move_speedUp = true;
 	}
 }
 void GameWidget::keyReleaseEvent(QKeyEvent *e)
@@ -89,6 +90,10 @@ void GameWidget::keyReleaseEvent(QKeyEvent *e)
 	if (e->key() == Qt::Key_W)
 	{
 		Player_yourself->behavior_move_ahead = false;
+	}
+	if (e->key() == Qt::Key_Shift)
+	{
+		Player_yourself->behavior_move_speedUp = false;
 	}
 }
 

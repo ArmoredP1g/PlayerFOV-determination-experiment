@@ -21,7 +21,8 @@ public:
 	bool behavior_move_back;
 	bool behavior_move_left;
 	bool behavior_move_right;
-	bool shooting;//开火行为
+	bool behavior_move_speedUp;
+	bool behavior_engage_shooting;//开火行为
 private:
 
 };
