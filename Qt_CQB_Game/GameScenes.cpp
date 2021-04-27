@@ -6,10 +6,11 @@
 GameScenes::GameScenes(QWidget *parent,GameMap * map,GameServer * server)
 	: QWidget(parent)
 {
-	scenes[0] = new GameWidget(this,map,&Player_yourself);
+	scenes[0] = new GameWidget(this,map,&Player_yourself,server);
 	scenes[1] = new ResultWidget(this);
 	server->addPlayer(&Player_yourself);
 	server->loadMap(map);
+	server->addDummyEnemyPlayers();
 }
 
 QWidget ** GameScenes::getScenes()

@@ -1,8 +1,9 @@
 #include "GameWidget.h"
+
 #include <iostream>
 #include <QPainter>
 using namespace std;
-GameWidget::GameWidget(QWidget *parent,GameMap * map, Player * player_self)
+GameWidget::GameWidget(QWidget *parent,GameMap * map, Player * player_self,GameServer * gameServer)
 	: QWidget(parent)
 {
 	count = 0;
@@ -11,6 +12,7 @@ GameWidget::GameWidget(QWidget *parent,GameMap * map, Player * player_self)
 	//初始化前端界面
 	Player_yourself = player_self;
 	this->map = map;
+	this->server = gameServer;
 	//配置界面刷新为100hz
 	timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &GameWidget::refreshUI);
@@ -47,6 +49,19 @@ void GameWidget::paintEvent(QPaintEvent *)
 	painter.setPen(pen);
 
 	painter.drawEllipse(QRectF(Player_yourself->pos_x-10, Player_yourself->pos_y-10,20,20));
+
+	//绘制视野内其他玩家
+	pen.setColor(QColor(255, 40, 40));
+	pen.setWidth(1);
+	painter.setPen(pen);
+	for (int i = 0; i < 12; i++)
+	{
+		if (server->playerVisualMap[Player_yourself->player_id][i].visibility)
+		{
+			painter.drawEllipse(QRectF(server->playerVisualMap[Player_yourself->player_id][i].pos_x - 10, 
+				server->playerVisualMap[Player_yourself->player_id][i].pos_y - 10, 20, 20));
+		}
+	}
 	//绘制交互物体
 }
 //key press events

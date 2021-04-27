@@ -7,6 +7,9 @@ public:
 
 	//服务器识别玩家id
 	unsigned int player_id;
+	bool visibility = false;//对其他玩家可见性
+	//阵营
+	unsigned int team;
 	//当前状态
 	double pos_x;//角色目前位置
 	double pos_y;

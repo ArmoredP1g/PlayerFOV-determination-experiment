@@ -7,6 +7,7 @@ GameServer::GameServer(QObject *parent)
 	//配置服务器刷新频率
 	timer = new QTimer(this);
 	connect(timer, &QTimer::timeout,this, &GameServer::run);
+	connect(timer, &QTimer::timeout, this, &GameServer::visualCalculate);
 	timer->start(1000/refreshRate_HZ);
 }
 
@@ -15,11 +16,42 @@ GameServer::~GameServer()
 
 }
 
+//只处理玩家操作行为
 void GameServer::run()
 {
 	//获取玩家行为
 	//calculate game events
 	getPlayerAction();
+}
+
+//处理视野
+void GameServer::visualCalculate()
+{
+	//玩家互相可见性图
+	for (int i=0; i < PlayerList.size(); i++)
+	{
+		for (int j = 0; j < PlayerList.size(); j++)
+		{
+			if (i != j)//自己不跟自己判断
+			{
+				//九点判断法 先判断墙体组
+				if (algo_LookThrough(PlayerList[i]->pos_x,
+					PlayerList[i]->pos_y,
+					PlayerList[j]->pos_x,
+					PlayerList[j]->pos_y))
+				{
+					playerVisualMap[i][j].visibility = true;
+					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
+					playerVisualMap[i][j].pos_y = PlayerList[j]->pos_y;
+					continue;
+				}
+				//九点判断法 再判断物体组
+				
+				//都没有
+				playerVisualMap[i][j].visibility = false;
+			}
+		}
+	}
 }
 
 void GameServer::loadMap(GameMap * map)
@@ -31,10 +63,27 @@ void GameServer::loadMap(GameMap * map)
 {
 	//给玩家分配一个id
 	player->player_id = ++newestPlayerId;
-	player->pos_x = 0;
-	player->pos_y = 0;
+	player->pos_x = 20;
+	player->pos_y = 20;
 	PlayerList.push_back(player);
 }
+
+ void GameServer::addDummyEnemyPlayers()
+ {
+	 Player * player1 = new Player;
+	 Player * player2 = new Player;
+	 player1->player_id = ++newestPlayerId;
+	 player1->team = 2;
+	 player1->pos_x = 64;
+	 player1->pos_y = 64;
+	 PlayerList.push_back(player1);
+	 player2->player_id = ++newestPlayerId;
+	 player2->team = 2;
+	 player2->pos_x = 64;
+	 player2->pos_y = 500;
+	 PlayerList.push_back(player2);
+ }
+                                                                                       
 
 void GameServer::getPlayerAction()
 {
@@ -169,4 +218,62 @@ bool GameServer::algo_CollisionDetection(double pos_x, double pos_y, wall * wall
 	{
 		return false;
 	}
+}
+
+bool GameServer::algo_LineIntersect(double A_x, double A_y, double B_x, double B_y, double C_x, double C_y, double D_x, double D_y)
+{
+	//向量相乘 x1*y2 - x2*y1
+	bool condition1 = false;
+	bool condition2 = false;
+	
+	double vecAC_x, vecAC_y;
+	double vecAD_x, vecAD_y;
+	double vecAB_x, vecAB_y;
+	
+	double vecCA_x, vecCA_y;
+	double vecCB_x, vecCB_y;
+	double vecCD_x, vecCD_y;
+
+	double ACxAB, ADxAB;
+	double CAxCD, CBxCD;
+
+	vecCD_x = D_x - C_x; vecCD_y = D_y - C_y;
+	vecAC_x = C_x - A_x; vecAC_y = C_y - A_y;
+	vecAD_x = D_x - A_x; vecAD_y = D_y - A_y;
+
+	vecAB_x = B_x - A_x; vecAB_y = B_y - A_y;
+	vecCA_x = A_x - C_x; vecCA_y = A_y - C_y;
+	vecCB_x = B_x - C_x; vecCB_y = B_y - C_y;
+
+	ACxAB = vecAC_x * vecAB_y - vecAB_x * vecAC_y;
+	ADxAB = vecAD_x * vecAB_y - vecAB_x * vecAD_y;
+
+	CAxCD = vecCA_x * vecCD_y - vecCD_x * vecCA_y;
+	CBxCD = vecCB_x * vecCD_y - vecCD_x * vecCB_y;
+
+	if ((ACxAB * ADxAB <= 0) && (CAxCD * CBxCD <= 0))
+	{
+		return true;
+	}
+	else 
+	{
+		return false;
+	}
+
+}
+//判断线是否被地图内固定元素遮挡
+bool GameServer::algo_LookThrough(double A_x, double A_y, double B_x, double B_y)
+{
+	for (int wall_num = 0; wall_num < map->walls.size(); wall_num++)
+	{
+		if (algo_LineIntersect(A_x, A_y, B_x, B_y,map->walls[wall_num].startPoint.x(),
+			map->walls[wall_num].startPoint.y(),
+			map->walls[wall_num].endPoint.x(),
+			map->walls[wall_num].endPoint.y()))
+
+		{
+			return false;
+		}
+	}
+	return true;
 }
