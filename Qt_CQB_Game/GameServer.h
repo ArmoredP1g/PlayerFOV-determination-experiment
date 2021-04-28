@@ -15,7 +15,7 @@ public:
 	GameServer(QObject *parent = NULL);
 	~GameServer();
 
-	unsigned int refreshRate_HZ = 160;//服务器刷新率
+	unsigned int refreshRate_HZ = 60;//服务器刷新率
 	unsigned int pace = 160;//人物步速
 	QTimer *timer;
 	GameMap * map;
