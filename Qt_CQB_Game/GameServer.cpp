@@ -59,8 +59,8 @@ void GameServer::visualCalculate()
 				//右上
 				if (algo_LookThrough(PlayerList[i]->pos_x,
 					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x + sqrt(PLAYER_SIZE),
-					PlayerList[j]->pos_y - sqrt(PLAYER_SIZE)))
+					PlayerList[j]->pos_x + PLAYER_SIZE / sqrt(2),
+					PlayerList[j]->pos_y - PLAYER_SIZE / sqrt(2)))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -81,8 +81,8 @@ void GameServer::visualCalculate()
 				//右下
 				if (algo_LookThrough(PlayerList[i]->pos_x,
 					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x + sqrt(PLAYER_SIZE),
-					PlayerList[j]->pos_y + sqrt(PLAYER_SIZE)))
+					PlayerList[j]->pos_x + PLAYER_SIZE / sqrt(2),
+					PlayerList[j]->pos_y + PLAYER_SIZE / sqrt(2)))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -91,9 +91,9 @@ void GameServer::visualCalculate()
 				}
 				//下
 				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y + PLAYER_SIZE,
+					PlayerList[i]->pos_y,
 					PlayerList[j]->pos_x,
-					PlayerList[j]->pos_y))
+					PlayerList[j]->pos_y + PLAYER_SIZE))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -103,8 +103,8 @@ void GameServer::visualCalculate()
 				//左下
 				if (algo_LookThrough(PlayerList[i]->pos_x,
 					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x - sqrt(PLAYER_SIZE),
-					PlayerList[j]->pos_y + sqrt(PLAYER_SIZE)))
+					PlayerList[j]->pos_x - PLAYER_SIZE / sqrt(2),
+					PlayerList[j]->pos_y + PLAYER_SIZE / sqrt(2)))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -125,8 +125,8 @@ void GameServer::visualCalculate()
 				//左上
 				if (algo_LookThrough(PlayerList[i]->pos_x,
 					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x - sqrt(PLAYER_SIZE),
-					PlayerList[j]->pos_y - sqrt(PLAYER_SIZE)))
+					PlayerList[j]->pos_x - PLAYER_SIZE / sqrt(2),
+					PlayerList[j]->pos_y - PLAYER_SIZE / sqrt(2)))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;

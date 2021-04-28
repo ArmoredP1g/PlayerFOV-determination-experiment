@@ -25,4 +25,5 @@ protected:
 	void keyPressEvent(QKeyEvent * e);
 	void keyReleaseEvent(QKeyEvent * e);
 	void refreshUI();
+	void DEBUG_DrawVisualLines();//œ‘ æ ”“∞œﬂ
 };

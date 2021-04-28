@@ -36,6 +36,7 @@ void GameWidget::paintEvent(QPaintEvent *)
 	pen.setColor(QColor(255, 255, 255));
 	pen.setWidth(3);
 	painter.setPen(pen);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 
 	//绘制地图
 	for (int i = 0; i < map->walls.size(); i++)
@@ -54,6 +55,7 @@ void GameWidget::paintEvent(QPaintEvent *)
 	pen.setColor(QColor(255, 40, 40));
 	pen.setWidth(1);
 	painter.setPen(pen);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	for (int i = 0; i < 12; i++)
 	{
 		if (server->playerVisualMap[Player_yourself->player_id][i].visibility)
@@ -63,6 +65,8 @@ void GameWidget::paintEvent(QPaintEvent *)
 		}
 	}
 	//绘制交互物体
+	//DEBUG_
+	DEBUG_DrawVisualLines();
 }
 //key press events
 void GameWidget::keyPressEvent(QKeyEvent *e)
@@ -115,4 +119,48 @@ void GameWidget::keyReleaseEvent(QKeyEvent *e)
 void GameWidget::refreshUI()
 {
 	this->update();
+}
+
+void GameWidget::DEBUG_DrawVisualLines()
+{
+	QPainter painter(this);
+	QPen pen; //画笔
+	pen.setColor(QColor(255, 0, 200));
+	pen.setWidth(1);
+	painter.setPen(pen);
+	painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+	for (int i = 0; i < 12; i++)
+	{
+		if (server->playerVisualMap[Player_yourself->player_id][i].visibility)
+		{
+			//middle
+			painter.drawLine(QPointF(Player_yourself->pos_x,Player_yourself->pos_y),
+							  QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x, server->playerVisualMap[Player_yourself->player_id][i].pos_y));
+			//u
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x , server->playerVisualMap[Player_yourself->player_id][i].pos_y - PLAYER_SIZE));
+			//ru
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x + PLAYER_SIZE/sqrt(2), server->playerVisualMap[Player_yourself->player_id][i].pos_y - PLAYER_SIZE / sqrt(2)));
+			//r
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x + PLAYER_SIZE, server->playerVisualMap[Player_yourself->player_id][i].pos_y));
+			//rd
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x + PLAYER_SIZE / sqrt(2), server->playerVisualMap[Player_yourself->player_id][i].pos_y + PLAYER_SIZE / sqrt(2)));
+			//d
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x, server->playerVisualMap[Player_yourself->player_id][i].pos_y + PLAYER_SIZE));
+			//ld
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x - PLAYER_SIZE / sqrt(2), server->playerVisualMap[Player_yourself->player_id][i].pos_y + PLAYER_SIZE / sqrt(2)));
+			//l
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x - PLAYER_SIZE, server->playerVisualMap[Player_yourself->player_id][i].pos_y));
+			//lu
+			painter.drawLine(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),
+				QPointF(server->playerVisualMap[Player_yourself->player_id][i].pos_x - PLAYER_SIZE / sqrt(2), server->playerVisualMap[Player_yourself->player_id][i].pos_y - PLAYER_SIZE / sqrt(2)));
+		}
+	}
+
 }
