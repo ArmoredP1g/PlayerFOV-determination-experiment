@@ -1,13 +1,14 @@
 #include "GameWidget.h"
-
 #include <iostream>
 #include <QPainter>
+#include "algorithm.h"
 using namespace std;
 GameWidget::GameWidget(QWidget *parent,GameMap * map, Player * player_self,GameServer * gameServer)
 	: QWidget(parent)
 {
 	count = 0;
-	this->grabKeyboard();
+	this->grabKeyboard();//使窗口可以捕捉按键
+	setMouseTracking(true);//无需点击即可触发鼠标移动事件
 	
 	//初始化前端界面
 	Player_yourself = player_self;
@@ -114,6 +115,14 @@ void GameWidget::keyReleaseEvent(QKeyEvent *e)
 	{
 		Player_yourself->behavior_move_speedUp = false;
 	}
+}
+
+void GameWidget::mouseMoveEvent(QMouseEvent * e)
+{	
+	//e->globalPos() 是获取在整个电脑屏幕的坐标
+	cout << "current aiming angle: " << algo_getLineAngle(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),e->pos()) << endl;
+	//cout << "x:	" << e->pos().x() << "	y:" << e->pos().y() << endl;
+	Player_yourself->facing = algo_getLineAngle(QPointF(Player_yourself->pos_x, Player_yourself->pos_y), e->pos());
 }
 
 void GameWidget::refreshUI()

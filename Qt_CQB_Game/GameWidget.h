@@ -24,6 +24,7 @@ protected:
 	void paintEvent(QPaintEvent *);
 	void keyPressEvent(QKeyEvent * e);
 	void keyReleaseEvent(QKeyEvent * e);
+	void mouseMoveEvent(QMouseEvent * e);
 	void refreshUI();
 	void DEBUG_DrawVisualLines();//œ‘ æ ”“∞œﬂ
 };

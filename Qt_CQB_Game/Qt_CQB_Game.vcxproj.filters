@@ -76,6 +76,9 @@
     <ClCompile Include="Player.cpp">
       <Filter>Source Files\Map&amp;Players&amp;Objects</Filter>
     </ClCompile>
+    <ClCompile Include="algorithm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="GameWidget.ui">
@@ -105,6 +108,9 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files\Map&amp;Players&amp;Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithm.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

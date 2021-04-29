@@ -86,6 +86,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="algorithm.cpp" />
     <ClCompile Include="GameServer.cpp" />
     <ClCompile Include="map.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -108,6 +109,7 @@
     <QtMoc Include="Result.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="algorithm.h" />
     <ClInclude Include="Player.h" />
     <QtMoc Include="GameServer.h" />
     <ClInclude Include="map.h" />
