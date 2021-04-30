@@ -14,7 +14,9 @@ public:
 	double pos_x;//角色目前位置
 	double pos_y;
 	double fov = 65;//视野
-	double facing;//目前朝向方向
+	double facingVec_x;//目前朝向向量
+	double facingVec_y;
+	double facingAngle;//当前瞄准角度
 	bool bleeding;
 	bool leg_hurted;
 	bool arm_hurted;

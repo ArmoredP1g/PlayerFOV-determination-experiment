@@ -25,7 +25,6 @@ GameWidget::GameWidget(QWidget *parent,GameMap * map, Player * player_self,GameS
 //drawing event
 void GameWidget::paintEvent(QPaintEvent *)
 {
-	//cout << "绘图事件被调用 " << ++count << " 次" << endl;
 	//paintevent会覆盖掉stylesheet的样式，需要加上这几句，Qframe没这个问题
 	QStyleOption opt;
 	opt.init(this);
@@ -49,8 +48,8 @@ void GameWidget::paintEvent(QPaintEvent *)
 	pen.setColor(QColor(255, 255, 0));
 	pen.setWidth(1);
 	painter.setPen(pen);
-
 	painter.drawEllipse(QRectF(Player_yourself->pos_x-10, Player_yourself->pos_y-10,20,20));
+
 
 	//绘制视野内其他玩家
 	pen.setColor(QColor(255, 40, 40));
@@ -68,6 +67,7 @@ void GameWidget::paintEvent(QPaintEvent *)
 	//绘制交互物体
 	//DEBUG_
 	DEBUG_DrawVisualLines();
+	DEBUG_DrawVisionBorders(Player_yourself);
 }
 //key press events
 void GameWidget::keyPressEvent(QKeyEvent *e)
@@ -119,15 +119,17 @@ void GameWidget::keyReleaseEvent(QKeyEvent *e)
 
 void GameWidget::mouseMoveEvent(QMouseEvent * e)
 {	
-	//e->globalPos() 是获取在整个电脑屏幕的坐标
-	cout << "current aiming angle: " << algo_getLineAngle(QPointF(Player_yourself->pos_x, Player_yourself->pos_y),e->pos()) << endl;
-	//cout << "x:	" << e->pos().x() << "	y:" << e->pos().y() << endl;
-	Player_yourself->facing = algo_getLineAngle(QPointF(Player_yourself->pos_x, Player_yourself->pos_y), e->pos());
+	//e->globalPos() 是获取在整个电脑屏幕的坐标	
+	Player_yourself->facingVec_x = e->pos().x();
+	Player_yourself->facingVec_y = e->pos().y();
+	Player_yourself->facingAngle = algo_getLineAngle(QPointF(Player_yourself->pos_x, Player_yourself->pos_y), e->pos());
+	//cout << "current aiming angle: " << Player_yourself->facingAngle << endl;
 }
 
 void GameWidget::refreshUI()
 {
 	this->update();
+
 }
 
 void GameWidget::DEBUG_DrawVisualLines()
@@ -172,4 +174,20 @@ void GameWidget::DEBUG_DrawVisualLines()
 		}
 	}
 
+}
+
+//绘制视野边界
+void GameWidget::DEBUG_DrawVisionBorders(Player * player)
+{
+	QPainter painter(this);
+	QPen pen; //画笔
+	pen.setColor(QColor(0, 255, 255));
+	pen.setWidth(1);
+	painter.setPen(pen);
+	painter.drawLine(QPointF(player->pos_x, player->pos_y),
+		algo_rotateLineByAngle(QPointF(player->pos_x, player->pos_y),
+			QPointF(player->facingVec_x, player->facingVec_y), -M_PI / 6,1500));
+	painter.drawLine(QPointF(player->pos_x, player->pos_y),
+		algo_rotateLineByAngle(QPointF(player->pos_x, player->pos_y),
+			QPointF(player->facingVec_x, player->facingVec_y), +M_PI / 6, 1500));
 }

@@ -1,13 +1,13 @@
 #include"GameServer.h"
 #include<iostream>
-#include "algorithm.h"
+
 using namespace std;
 
 GameServer::GameServer(QObject *parent)
 {
 	//配置服务器刷新频率
 	timer = new QTimer(this);
-	connect(timer, &QTimer::timeout,this, &GameServer::run);
+	connect(timer, &QTimer::timeout,this, &GameServer::getPlayerAction);//获取玩家行为
 	connect(timer, &QTimer::timeout, this, &GameServer::visualCalculate);
 	timer->start(1000/refreshRate_HZ);
 }
@@ -17,12 +17,10 @@ GameServer::~GameServer()
 
 }
 
-//只处理玩家操作行为
+
 void GameServer::run()
 {
-	//获取玩家行为
-	//calculate game events
-	getPlayerAction();
+
 }
 
 //处理视野
@@ -35,12 +33,8 @@ void GameServer::visualCalculate()
 		{
 			if (i != j)//自己不跟自己判断
 			{
-				//九点判断法 先判断墙体组
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x,
-					PlayerList[j]->pos_y,
-					map))
+				//九点判断法
+				if (algo_LookThrough(PlayerList[j]->pos_x,PlayerList[j]->pos_y,map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -48,11 +42,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//上
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x,
-					PlayerList[j]->pos_y - PLAYER_SIZE,
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x, PlayerList[j]->pos_y - PLAYER_SIZE, map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -60,11 +50,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//右上
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x + PLAYER_SIZE / sqrt(2),
-					PlayerList[j]->pos_y - PLAYER_SIZE / sqrt(2),
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x + PLAYER_SIZE / sqrt(2), PlayerList[j]->pos_y - PLAYER_SIZE / sqrt(2), map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -72,11 +58,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//右
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x + PLAYER_SIZE,
-					PlayerList[j]->pos_y,
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x + PLAYER_SIZE, PlayerList[j]->pos_y, map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -84,11 +66,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//右下
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x + PLAYER_SIZE / sqrt(2),
-					PlayerList[j]->pos_y + PLAYER_SIZE / sqrt(2),
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x + PLAYER_SIZE / sqrt(2), PlayerList[j]->pos_y + PLAYER_SIZE / sqrt(2), map, PlayerList[i]))			
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -96,11 +74,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//下
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x,
-					PlayerList[j]->pos_y + PLAYER_SIZE,
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x, PlayerList[j]->pos_y + PLAYER_SIZE, map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -108,11 +82,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//左下
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x - PLAYER_SIZE / sqrt(2),
-					PlayerList[j]->pos_y + PLAYER_SIZE / sqrt(2),
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x - PLAYER_SIZE / sqrt(2), PlayerList[j]->pos_y + PLAYER_SIZE / sqrt(2), map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -120,11 +90,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//左
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x - PLAYER_SIZE,
-					PlayerList[j]->pos_y,
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x - PLAYER_SIZE, PlayerList[j]->pos_y, map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -132,11 +98,7 @@ void GameServer::visualCalculate()
 					continue;
 				}
 				//左上
-				if (algo_LookThrough(PlayerList[i]->pos_x,
-					PlayerList[i]->pos_y,
-					PlayerList[j]->pos_x - PLAYER_SIZE / sqrt(2),
-					PlayerList[j]->pos_y - PLAYER_SIZE / sqrt(2),
-					map))
+				if (algo_LookThrough(PlayerList[j]->pos_x - PLAYER_SIZE / sqrt(2), PlayerList[j]->pos_y - PLAYER_SIZE / sqrt(2), map, PlayerList[i]))
 				{
 					playerVisualMap[i][j].visibility = true;
 					playerVisualMap[i][j].pos_x = PlayerList[j]->pos_x;
@@ -204,7 +166,7 @@ void GameServer::loadMap(GameMap * map)
 	 PlayerList.push_back(player5);
  }
                                                                                        
-
+ //只处理玩家操作行为
 void GameServer::getPlayerAction()
 {
 	for (int players = 0; players < PlayerList.size(); players++)
@@ -287,5 +249,9 @@ void GameServer::getPlayerAction()
 				PlayerList[players]->pos_x += (pace*(1 + PlayerList[players]->behavior_move_speedUp) / refreshRate_HZ);
 			}			
 		}
+
+		//判断玩家朝向
+		PlayerList[players]->facingAngle = algo_getLineAngle(QPointF(PlayerList[players]->pos_x, PlayerList[players]->pos_y),
+															 QPointF(PlayerList[players]->facingVec_x, PlayerList[players]->facingVec_y));
 	}
 }

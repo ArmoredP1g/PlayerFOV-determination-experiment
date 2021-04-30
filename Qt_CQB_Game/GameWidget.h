@@ -27,4 +27,5 @@ protected:
 	void mouseMoveEvent(QMouseEvent * e);
 	void refreshUI();
 	void DEBUG_DrawVisualLines();//显示视野线
+	void DEBUG_DrawVisionBorders(Player * player);//绘制视野边界
 };

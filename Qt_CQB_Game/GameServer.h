@@ -4,9 +4,11 @@
 #include <vector>
 #include <qtimer.h>
 #include "map.h"
+#include "algorithm.h"
 #include <qmath.h>
 
 #define PLAYER_SIZE 10
+#define PLAYER_FOV M_PI/6
 //游戏后台判定
 class GameServer : public QThread
 {

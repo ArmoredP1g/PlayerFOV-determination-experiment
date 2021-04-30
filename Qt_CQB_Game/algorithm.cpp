@@ -1,5 +1,7 @@
 #include "algorithm.h"
 #include "GameServer.h"
+#include <iostream>
+using namespace std;
 //点与墙体的碰撞检测(两点式的点到直线距离公式推导,再判断端点边界)
 bool algo_CollisionDetection(double pos_x, double pos_y, wall * wall)
 {
@@ -93,12 +95,18 @@ bool algo_LineIntersect(double A_x, double A_y, double B_x, double B_y, double C
 	}
 
 }
-//判断线是否被地图内固定元素遮挡
-bool algo_LookThrough(double A_x, double A_y, double B_x, double B_y, GameMap * map)
+//判断玩家是否能看到目标
+bool algo_LookThrough(double target_x, double target_y, GameMap * map, Player * player)
 {
+	//先判断是否在视角内
+	if (!algo_InFOV(player, QPointF(target_x, target_y)))
+	{
+		return false;
+	}
+	//再判断和墙体碰撞
 	for (int wall_num = 0; wall_num < map->walls.size(); wall_num++)
 	{
-		if (algo_LineIntersect(A_x, A_y, B_x, B_y, map->walls[wall_num].startPoint.x(),
+		if (algo_LineIntersect(player->pos_x, player->pos_y, target_x, target_y, map->walls[wall_num].startPoint.x(),
 			map->walls[wall_num].startPoint.y(),
 			map->walls[wall_num].endPoint.x(),
 			map->walls[wall_num].endPoint.y()))
@@ -110,7 +118,46 @@ bool algo_LookThrough(double A_x, double A_y, double B_x, double B_y, GameMap * 
 	return true;
 }
 
-//计算角色面朝方向角度(qt这坐标y是反的)
+//目标是否在玩家视野角内
+bool algo_InFOV(Player * player, QPointF target)
+{
+	double upperLimit;
+	double lowerLimit;
+	double targetAngle = algo_getLineAngle(QPointF(player->pos_x, player->pos_y), target);
+	//处理特殊区间
+	if (player->facingAngle > 2 * M_PI - PLAYER_FOV)
+	{
+		upperLimit = player->facingAngle - 2 * M_PI + PLAYER_FOV;
+		lowerLimit = player->facingAngle - 2 * M_PI - PLAYER_FOV;
+	}
+	else
+	{
+		upperLimit = player->facingAngle + PLAYER_FOV;
+		lowerLimit = player->facingAngle - PLAYER_FOV;
+	}
+	//cout << "lowerLimit: " << lowerLimit << "	upperLimit: " << upperLimit << "	targetAngle: " << endl;
+
+	if (lowerLimit < 0)
+	{
+		if (targetAngle > lowerLimit + 2 * M_PI)
+		{
+			targetAngle -= 2 * M_PI;
+		}
+	}
+
+	if (targetAngle >= lowerLimit && targetAngle <= upperLimit)
+	{
+		//cout << "lowerLimit: " << lowerLimit << "	upperLimit: " << upperLimit << "	targetAngle: " << targetAngle << " 在" << endl;
+		return true;
+	}
+	else
+	{
+		//cout<<"lowerLimit: "<< lowerLimit << "	upperLimit: " << upperLimit << "	targetAngle: " << targetAngle <<" 不在"<< endl;
+		return false;
+	}
+}
+
+//计算角色面朝方向角度 正上为0,顺时针算(qt这坐标y是反的)
 double algo_getLineAngle(QPointF startPoint, QPointF endPoint)
 {
 	if (endPoint.x() - startPoint.x() > 0)
@@ -169,4 +216,162 @@ double algo_getLineAngle(QPointF startPoint, QPointF endPoint)
 	}
 	//原点返回0
 	return 0;
+}
+
+//绕端点旋转视线边界线段,正顺时针负逆时针,返回终点新坐标,(依赖algo_getLineAngle函数)
+QPointF algo_rotateLineByAngle(QPointF startPoint, QPointF endPoint,double rotate_angle)
+{
+	QPointF result;
+	double angle_start = algo_getLineAngle(startPoint,endPoint) ;
+	double lenth = sqrt(pow(startPoint.x()-endPoint.x(), 2)+ pow(startPoint.y() - endPoint.y(), 2));//线段长度
+	double angle = angle_start + rotate_angle;//直线最终的角度
+
+	//处理区间外的情况
+	if (angle >= 2 * M_PI)
+	{
+		angle -= 2 * M_PI;
+	}
+	if (angle < 0)
+	{
+		angle += 2 * M_PI;
+	}
+
+	//右上象限
+	if (angle > 0 && angle < 0.5*M_PI)
+	{
+		result.setX(startPoint.x() + sin(angle)*lenth);
+		result.setY(startPoint.y() - cos(angle)*lenth);
+		return result;
+	}
+	//右下象限
+	if (angle > 0.5*M_PI && angle < M_PI)
+	{
+		result.setX(startPoint.x() + cos(angle-0.5*M_PI)*lenth);
+		result.setY(startPoint.y() + sin(angle - 0.5*M_PI)*lenth);
+		return result;
+	}
+	//左下象限
+	if (angle > M_PI && angle < 1.5*M_PI)
+	{
+		result.setX(startPoint.x() - sin(angle - M_PI)*lenth);
+		result.setY(startPoint.y() + cos(angle - M_PI)*lenth);
+		return result;
+	}
+	//左上象限
+	if (angle > 1.5*M_PI && angle < 2 * M_PI)
+	{
+		result.setX(startPoint.x() - cos(angle - 1.5*M_PI)*lenth);
+		result.setY(startPoint.y() - sin(angle - 1.5*M_PI)*lenth);
+		return result;
+	}
+	//正上
+	if (angle == 0)
+	{
+		result.setX(startPoint.x());
+		result.setY(startPoint.y() - lenth);
+		return result;
+	}
+	//正右
+	if (angle == 0.5*M_PI)
+	{
+		result.setX(startPoint.x() + lenth);
+		result.setY(startPoint.y());
+		return result;
+	}
+	//正下
+	if (angle == M_PI)
+	{
+		result.setX(startPoint.x());
+		result.setY(startPoint.y() + lenth);
+		return result;
+	}
+	//正左
+	if (angle == 1.5*M_PI)
+	{
+		result.setX(startPoint.x() - lenth);
+		result.setY(startPoint.y());
+		return result;
+	}
+
+	//这些都不满足 只能是原点
+	return startPoint;
+}
+
+//固定长度的射线
+QPointF algo_rotateLineByAngle(QPointF startPoint, QPointF endPoint, double rotate_angle ,double fixLenth)
+{
+	QPointF result;
+	double angle_start = algo_getLineAngle(startPoint, endPoint);
+	double lenth = fixLenth;//线段长度
+	double angle = angle_start + rotate_angle;//直线最终的角度
+
+	//处理区间外的情况
+	if (angle >= 2 * M_PI)
+	{
+		angle -= 2 * M_PI;
+	}
+	if (angle < 0)
+	{
+		angle += 2 * M_PI;
+	}
+
+	//右上象限
+	if (angle > 0 && angle < 0.5*M_PI)
+	{
+		result.setX(startPoint.x() + sin(angle)*lenth);
+		result.setY(startPoint.y() - cos(angle)*lenth);
+		return result;
+	}
+	//右下象限
+	if (angle > 0.5*M_PI && angle < M_PI)
+	{
+		result.setX(startPoint.x() + cos(angle - 0.5*M_PI)*lenth);
+		result.setY(startPoint.y() + sin(angle - 0.5*M_PI)*lenth);
+		return result;
+	}
+	//左下象限
+	if (angle > M_PI && angle < 1.5*M_PI)
+	{
+		result.setX(startPoint.x() - sin(angle - M_PI)*lenth);
+		result.setY(startPoint.y() + cos(angle - M_PI)*lenth);
+		return result;
+	}
+	//左上象限
+	if (angle > 1.5*M_PI && angle < 2 * M_PI)
+	{
+		result.setX(startPoint.x() - cos(angle - 1.5*M_PI)*lenth);
+		result.setY(startPoint.y() - sin(angle - 1.5*M_PI)*lenth);
+		return result;
+	}
+	//正上
+	if (angle == 0)
+	{
+		result.setX(startPoint.x());
+		result.setY(startPoint.y() - lenth);
+		return result;
+	}
+	//正右
+	if (angle == 0.5*M_PI)
+	{
+		result.setX(startPoint.x() + lenth);
+		result.setY(startPoint.y());
+		return result;
+	}
+	//正下
+	if (angle == M_PI)
+	{
+		result.setX(startPoint.x());
+		result.setY(startPoint.y() + lenth);
+		return result;
+	}
+	//正左
+	if (angle == 1.5*M_PI)
+	{
+		result.setX(startPoint.x() - lenth);
+		result.setY(startPoint.y());
+		return result;
+	}
+
+	//这些都不满足 只能是原点
+	return startPoint;
 }
